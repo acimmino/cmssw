@@ -1,6 +1,6 @@
 #include <DQM/RPCMonitorClient/interface/RPCBxTest.h>
 #include "DQM/RPCMonitorDigi/interface/utils.h"
-
+//This is just a test to use GIT
 // Framework
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 
