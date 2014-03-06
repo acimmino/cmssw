@@ -35,7 +35,7 @@ RPCMonitorDigi::RPCMonitorDigi( const edm::ParameterSet& pset ):counter(0){
 
   rpcRecHitLabel_ = pset.getParameter<edm::InputTag>("RecHitLabel");
 
-  numberOfDisks_ = pset.getUntrackedParameter<int>("NumberOfEndcapDisks", 3);
+  numberOfDisks_ = pset.getUntrackedParameter<int>("NumberOfEndcapDisks", 4);
   numberOfInnerRings_ = pset.getUntrackedParameter<int>("NumberOfInnermostEndcapRings", 2);
 
   noiseFolder_ = pset.getUntrackedParameter<std::string>("NoiseFolder", "AllHits");
@@ -419,8 +419,8 @@ void RPCMonitorDigi::performSourceOperation(  std::map<RPCDetId , std::vector<RP
 	os.str("");
 	os<<"1DOccupancy_Ring_"<<ring;
 	if ((meWheelDisk[os.str()])){
-	  if (wheelOrDiskNumber > 0 ) meWheelDisk[os.str()]->Fill(wheelOrDiskNumber +3, clusterSize);
-	  else meWheelDisk[os.str()]->Fill(wheelOrDiskNumber + 4, clusterSize);
+	  if (wheelOrDiskNumber > 0 ) meWheelDisk[os.str()]->Fill(wheelOrDiskNumber + RPCMonitorDigi::numberOfDisks_, clusterSize);
+	  else meWheelDisk[os.str()]->Fill(wheelOrDiskNumber +  RPCMonitorDigi::numberOfDisks_+1, clusterSize);
 	}
 
 	os.str("");
@@ -480,8 +480,8 @@ void RPCMonitorDigi::performSourceOperation(  std::map<RPCDetId , std::vector<RP
       if(meRegion[os.str()]) meRegion[os.str()]->Fill(sector, wheelOrDiskNumber, numDigi);
     }else {
       os<<"Occupancy_for_Endcap";
-      int xbin = wheelOrDiskNumber+3;
-      if (region==-1) xbin = wheelOrDiskNumber+4;
+      int xbin = RPCMonitorDigi::numberOfDisks_+ wheelOrDiskNumber;
+      if (region==-1) xbin = wheelOrDiskNumber+ RPCMonitorDigi::numberOfDisks_+1;
       if(meRegion[os.str()]) meRegion[os.str()]->Fill(xbin,ring,numDigi);
     }
 

@@ -42,7 +42,7 @@ protected:
   MonitorElement* me_notComplete[3];
 
 private:
-  edm::InputTag rpcRawSynchroProdItemTag_;
+ edm::InputTag rpcRawSynchroProdItemTag_;
 };
 
 #endif

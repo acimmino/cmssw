@@ -27,15 +27,15 @@ void RPCMonitorDigi::bookRollME(RPCDetId & detId, const edm::EventSetup & iSetup
     nameRoll = RPCname.name();
   }else{
     nameRoll = RPCname.chambername();
-  }
-
+  
     if(detId.region() != 0 || //Endcaps
        (abs(detId.ring()) == 2 && detId.station()== 2 && detId.layer() != 1) ||  //Wheel -/+2 RB2out
        (abs(detId.ring()) != 2 && detId.station()== 2 && detId.layer() == 1)){nstrips *= 3;} //Wheel -1,0,+1 RB2in
     else {
       nstrips *= 2;
     }
-
+  
+  }
 
   std::stringstream os;
   os.str("");
@@ -46,7 +46,7 @@ void RPCMonitorDigi::bookRollME(RPCDetId & detId, const edm::EventSetup & iSetup
   os.str("");
   os<<"BXDistribution_"<<nameRoll;
   meMap[os.str()] = dbe->book1D(os.str(), os.str(), 7, -3.5, 3.5);
-   
+  dbe->tag( meMap[os.str()],  rpcdqm::BX);
 
   if(detId.region() == 0){
     os.str("");
@@ -421,19 +421,18 @@ void RPCMonitorDigi::bookRegionME(const std::string & recHitType, std::map<std::
 
   me = dbe->get(currentFolder+ "/Occupancy_for_Endcap");
   if (me) dbe->removeElement(me->getName());
-  meMap["Occupancy_for_Endcap"] = dbe -> book2D("Occupancy_for_Endcap", "Occupancy Endcap", 6, 0.5, 6.5, 2, 1.5, 3.5);
+  meMap["Occupancy_for_Endcap"] = dbe -> book2D("Occupancy_for_Endcap", "Occupancy Endcap", (RPCMonitorDigi::numberOfDisks_*2) , 0.5, (float)(RPCMonitorDigi::numberOfDisks_*2.0)+0.5, 2, 1.5, 3.5);
   meMap["Occupancy_for_Endcap"] ->setAxisTitle("Disk", 1);
   meMap["Occupancy_for_Endcap"] ->setAxisTitle("Ring", 2);
 
   std::stringstream binlabel;
-  for (int bin = 1 ; bin <= 6 ; bin++){
-    binlabel.str("");
-    if(bin<4) {//negative endcap
-      binlabel<<(bin-4); 
-    }else{//positive endcaps
-      binlabel<<(bin-3); 
-    }
-    meMap["Occupancy_for_Endcap"]->setBinLabel( bin , binlabel.str(), 1);
+  int b = 1;
+  for (int bin = -RPCMonitorDigi::numberOfDisks_; bin<=RPCMonitorDigi::numberOfDisks_; bin++){
+      if(bin==0 || b>(RPCMonitorDigi::numberOfDisks_*2)) continue;
+      binlabel.str("");
+      binlabel<<bin;
+      meMap["Occupancy_for_Endcap"]->setBinLabel( b , binlabel.str(), 1);
+      b++;
   }
 
   meMap["Occupancy_for_Endcap"]->setBinLabel( 1 , "2", 2);

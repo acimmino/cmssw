@@ -9,18 +9,18 @@
 #include "DQMServices/Core/interface/MonitorElement.h"
 //DataFormats
 #include <DataFormats/MuonDetId/interface/RPCDetId.h>
-#include "DataFormats/RPCDigi/interface/RPCDigiCollection.h"
+
 //Geometry
 #include "Geometry/RPCGeometry/interface/RPCGeomServ.h"
 #include "Geometry/RPCGeometry/interface/RPCGeometry.h"
 #include "Geometry/Records/interface/MuonGeometryRecord.h"
 
 
-RPCMon_SS_Dbx_Global::RPCMon_SS_Dbx_Global(const edm::ParameterSet& iConfig ) :
-  rpcDigiCollectionTag_(iConfig.getParameter<edm::InputTag>("rpcDigiCollectionTag")) {
+RPCMon_SS_Dbx_Global::RPCMon_SS_Dbx_Global(const edm::ParameterSet& iConfig ) {
 
-
-  edm::LogVerbatim ("rpcmonitorerror") << "[RPCMon_SS_Dbx_Global]: Constructor";
+   rpcDigiCollectionTag_  = iConfig.getUntrackedParameter<edm::InputTag>("rpcDigiCollectionTag");
+   
+   edm::LogVerbatim ("rpcmonitorerror") << "[RPCMon_SS_Dbx_Global]: Constructor";
 
 
   globalFolder_ = iConfig.getUntrackedParameter<std::string>("GlobalHistogramsFolder","RPC/RecHits/SummaryHistograms");
@@ -38,8 +38,9 @@ RPCMon_SS_Dbx_Global::~RPCMon_SS_Dbx_Global(){
 }
 
 void RPCMon_SS_Dbx_Global::beginJob(){
+
  edm::LogVerbatim ("rpcmonitorerror") << "[RPCMon_SS_Dbx_Global]: Begin job ";
- dbe_ = edm::Service<DQMStore>().operator->();
+
 }
 
 void RPCMon_SS_Dbx_Global::endJob(){}
@@ -47,6 +48,7 @@ void RPCMon_SS_Dbx_Global::endJob(){}
 void RPCMon_SS_Dbx_Global::beginRun(const edm::Run& r, const edm::EventSetup& c){
   edm::LogVerbatim ("rpcmonitorerror") << "[RPCMon_SS_Dbx_Global]: Begin run";
 
+  dbe_ = edm::Service<DQMStore>().operator->();
   dbe_->setCurrentFolder(globalFolder_);
 
   MonitorElement* me;

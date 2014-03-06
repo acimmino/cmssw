@@ -11,7 +11,7 @@
 
 namespace rpcdqm{
 
-  enum RPCMeFLag{OCCUPANCY = 1, CLUSTERSIZE = 2, MULTIPLICITY =3};
+  enum RPCMeFLag{OCCUPANCY = 1, CLUSTERSIZE = 2, MULTIPLICITY = 3, BX = 4};
 
   class utils{
   public:
