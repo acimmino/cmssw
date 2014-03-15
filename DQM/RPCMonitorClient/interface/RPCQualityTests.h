@@ -29,8 +29,8 @@ class RPCQualityTests : public edm::EDAnalyzer {
       virtual void beginJob() ;
       virtual void analyze(const edm::Event&, const edm::EventSetup&);
       virtual void endJob();
-      virtual void beginRun(const edm::Run& r, const edm::EventSetup& c);
-      virtual void endRun(const edm::Run& r, const edm::EventSetup& c);  
+      virtual void beginRun(const edm::Run& , const edm::EventSetup& );
+      virtual void endRun(const edm::Run& , const edm::EventSetup& );  
 
       void beginLuminosityBlock(edm::LuminosityBlock const& lumiSeg, edm::EventSetup const& context) ;
       void endLuminosityBlock(edm::LuminosityBlock const& lumiSeg, edm::EventSetup const& c);

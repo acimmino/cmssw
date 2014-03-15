@@ -5,6 +5,7 @@
 #include <FWCore/Framework/interface/EDAnalyzer.h>
 #include <FWCore/Framework/interface/MakerMacros.h>
 #include "FWCore/ServiceRegistry/interface/Service.h"
+#include <FWCore/Framework/interface/ESHandle.h>
 #include "DQMServices/Core/interface/MonitorElement.h"
 #include "DQMServices/Core/interface/DQMStore.h"
 

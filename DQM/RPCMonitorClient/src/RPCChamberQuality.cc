@@ -6,6 +6,11 @@
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 //DataFormats
 #include <DataFormats/MuonDetId/interface/RPCDetId.h>
+///Geometry                                                                                                                                                  
+#include "Geometry/Records/interface/MuonGeometryRecord.h"
+#include "Geometry/CommonDetUnit/interface/GeomDet.h"
+#include "Geometry/RPCGeometry/interface/RPCGeomServ.h"
+#include "Geometry/RPCGeometry/interface/RPCGeometry.h"
 
 const std::string RPCChamberQuality::xLabels_[7] = {"Good", "OFF", "Nois.St","Nois.Ch","Part.Dead","Dead","Bad.Shape"};
 const std::string RPCChamberQuality::regions_[3] = {"EndcapNegative","Barrel","EndcapPositive"};
@@ -25,7 +30,6 @@ RPCChamberQuality::RPCChamberQuality(const edm::ParameterSet& ps ){
   enableDQMClients_ = ps.getUntrackedParameter<bool> ("EnableRPCDqmClient",true); 
 
   minEvents = ps.getUntrackedParameter<int>("MinimumRPCEvents", 10000);
-  numberOfDisks_ = ps.getUntrackedParameter<int>("NumberOfEndcapDisks", 4);
   useRollInfo_ = ps.getUntrackedParameter<bool> ("UseRollInfo",false); 
   offlineDQM_ = ps.getUntrackedParameter<bool> ("OfflineDQM",true); 
 }
@@ -45,6 +49,26 @@ void RPCChamberQuality::beginJob(){
 void RPCChamberQuality::beginRun(const edm::Run& r, const edm::EventSetup& c){
   edm::LogVerbatim ("rpceventsummary") << "[RPCChamberQuality]: Begin run";
   if(!  enableDQMClients_ ) return;
+
+
+  std::set<int> disk_set;
+  edm::ESHandle<RPCGeometry> rpcGeo;
+  c.get<MuonGeometryRecord>().get(rpcGeo);
+
+  //loop on geometry to get number of disks                                                                                                                   
+  for (TrackingGeometry::DetContainer::const_iterator it=rpcGeo->dets().begin();it<rpcGeo->dets().end();it++){
+    if(dynamic_cast< RPCChamber* >( *it ) != 0 ){
+      RPCChamber* ch = dynamic_cast< RPCChamber* >( *it );
+      std::vector< const RPCRoll*> roles = (ch->rolls());
+      RPCDetId rpcId = roles[0]->id();
+      if(rpcId.region()!=0){ //Only Endcap                                                                                                                    
+        disk_set.insert(rpcId.station());
+      }
+    }
+  }//end loop on geometry to get number of disks                                                                                                              
+
+  numberOfDisks_ = disk_set.size();
+
   
   init_ = false;  
   lumiCounter_ = prescaleFactor_ ;

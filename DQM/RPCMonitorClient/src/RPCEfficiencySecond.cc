@@ -24,15 +24,35 @@ RPCEfficiencySecond::RPCEfficiencySecond(const edm::ParameterSet& iConfig){
   NameFile  = iConfig.getUntrackedParameter<std::string>("NameFile","RPCEfficiency.root"); 
   folderPath  = iConfig.getUntrackedParameter<std::string>("folderPath","RPC/RPCEfficiency/"); 
   debug = iConfig.getUntrackedParameter<bool>("debug",false); 
-  numberOfDisks_ =   iConfig.getUntrackedParameter<int>("NumberOfEndcapDisks", 4);
-  innermostRings_ = iConfig.getUntrackedParameter<int>("NumberOfInnermostEndcapRings", 2);
 
 }
  
 RPCEfficiencySecond::~RPCEfficiencySecond(){}
 
 void RPCEfficiencySecond::beginRun(const edm::Run&, const edm::EventSetup& iSetup){
+
+  std::set<int> disk_set, ring_set;
+  edm::ESHandle<RPCGeometry> rpcGeo;
+  iSetup.get<MuonGeometryRecord>().get(rpcGeo);
+
+  //loop on geometry to get number of disks                                                                                                                   
+  for (TrackingGeometry::DetContainer::const_iterator it=rpcGeo->dets().begin();it<rpcGeo->dets().end();it++){
+    if(dynamic_cast< RPCChamber* >( *it ) != 0 ){
+      RPCChamber* ch = dynamic_cast< RPCChamber* >( *it );
+      std::vector< const RPCRoll*> roles = (ch->rolls());
+      RPCDetId rpcId = roles[0]->id();
+      if(rpcId.region()!=0){ //Only Endcap                                                                                                                   
+	ring_set.insert(rpcId.ring());
+        disk_set.insert(rpcId.station());
+      }
+    }
+  }//end loop on geometry to get number of disks                                                                        
+
   
+  numberOfDisks_ = disk_set.size();
+  innermostRings_ = (*ring_set.begin());
+
+
   dbe = edm::Service<DQMStore>().operator->();
   rpcdqm::utils rpcUtils;
   //Barrel 

@@ -36,7 +36,7 @@ public:
   void endLuminosityBlock(edm::LuminosityBlock const& , edm::EventSetup const& );
  
   //End Run
-  void beginRun(const edm::Run& , const edm::EventSetup& ); 		
+  void beginRun(const edm::Run& , const edm::EventSetup& , int, int); 		
   
   /// Endjob
   void endJob();

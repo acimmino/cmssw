@@ -10,11 +10,13 @@
 //CondFormats
 #include "CondFormats/RunInfo/interface/RunInfo.h"
 #include "CondFormats/DataRecord/interface/RunSummaryRcd.h"
-
+///Geometry                                                                                                                                                  
+#include "Geometry/Records/interface/MuonGeometryRecord.h"
+#include "Geometry/CommonDetUnit/interface/GeomDet.h"
+#include "Geometry/RPCGeometry/interface/RPCGeomServ.h"
+#include "Geometry/RPCGeometry/interface/RPCGeometry.h"
 
 RPCDCSSummary::RPCDCSSummary(const edm::ParameterSet& ps) {
-
- numberOfDisks_ = ps.getUntrackedParameter<int>("NumberOfEndcapDisks", 4);
 
  FEDRange_.first  = ps.getUntrackedParameter<unsigned int>("MinimumRPCFEDId", 790);
  FEDRange_.second = ps.getUntrackedParameter<unsigned int>("MaximumRPCFEDId", 792);
@@ -27,7 +29,28 @@ RPCDCSSummary::~RPCDCSSummary() {}
 void RPCDCSSummary::beginJob() {}
 
 void RPCDCSSummary::beginRun(const edm::Run& r, const edm::EventSetup& setup){
- edm::eventsetup::EventSetupRecordKey recordKey(edm::eventsetup::EventSetupRecordKey::TypeTag::findType("RunInfoRcd"));
+  edm::eventsetup::EventSetupRecordKey recordKey(edm::eventsetup::EventSetupRecordKey::TypeTag::findType("RunInfoRcd"));
+  
+  
+  std::set<int> disk_set;
+  edm::ESHandle<RPCGeometry> rpcGeo;
+  setup.get<MuonGeometryRecord>().get(rpcGeo);
+  
+  //loop on geometry to get number of disks                                                                                                                 
+  for (TrackingGeometry::DetContainer::const_iterator it=rpcGeo->dets().begin();it<rpcGeo->dets().end();it++){
+    if(dynamic_cast< RPCChamber* >( *it ) != 0 ){
+      RPCChamber* ch = dynamic_cast< RPCChamber* >( *it );
+      std::vector< const RPCRoll*> roles = (ch->rolls());
+      RPCDetId rpcId = roles[0]->id();
+      if(rpcId.region()!=0){ //Only Endcap                                                                                                                   
+	disk_set.insert(rpcId.station());
+      }
+    }
+  }//end loop on geometry to get number of disks                                                                                                            
+  
+  numberOfDisks_ = disk_set.size();
+  
+
 
  int defaultValue = 1;
 

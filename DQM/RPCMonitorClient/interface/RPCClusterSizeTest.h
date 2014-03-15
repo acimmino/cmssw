@@ -37,7 +37,7 @@ class RPCClusterSizeTest:public RPCClient{
 
   void  endJob(void);
 
-  void  beginRun(const edm::Run& r, const edm::EventSetup& c);
+  void  beginRun(const edm::Run& r, const edm::EventSetup& c, int, int);
 
   void  clientOperation(edm::EventSetup const& c);
 

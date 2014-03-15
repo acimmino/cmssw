@@ -3,6 +3,12 @@
 #include "CondFormats/RunInfo/interface/RunInfo.h"
 #include "CondFormats/RunInfo/interface/RunSummary.h"
 #include "CondFormats/DataRecord/interface/RunSummaryRcd.h"
+///Geometry                                                                                                                                                  
+#include "Geometry/Records/interface/MuonGeometryRecord.h"
+#include "Geometry/CommonDetUnit/interface/GeomDet.h"
+#include "Geometry/RPCGeometry/interface/RPCGeomServ.h"
+#include "Geometry/RPCGeometry/interface/RPCGeometry.h"
+
 
 RPCDaqInfo::RPCDaqInfo(const edm::ParameterSet& ps) {
  
@@ -11,7 +17,6 @@ RPCDaqInfo::RPCDaqInfo(const edm::ParameterSet& ps) {
   
   NumberOfFeds_ =FEDRange_.second -  FEDRange_.first +1;
 
-  numberOfDisks_ = ps.getUntrackedParameter<int>("NumberOfEndcapDisks", 4);
 }
 
 RPCDaqInfo::~RPCDaqInfo(){}
@@ -52,7 +57,27 @@ void RPCDaqInfo::beginLuminosityBlock(const edm::LuminosityBlock& lumiBlock, con
 void RPCDaqInfo::endLuminosityBlock(const edm::LuminosityBlock&  lumiBlock, const  edm::EventSetup& iSetup){}
 
 
-void RPCDaqInfo::beginJob(){
+void RPCDaqInfo::beginJob(){}
+void RPCDaqInfo::beginRun(const edm::Run& r, const edm::EventSetup& setup){
+    
+  std::set<int> disk_set;
+  edm::ESHandle<RPCGeometry> rpcGeo;
+  setup.get<MuonGeometryRecord>().get(rpcGeo);
+  
+  //loop on geometry to get number of disks                                                                                                                   
+  for (TrackingGeometry::DetContainer::const_iterator it=rpcGeo->dets().begin();it<rpcGeo->dets().end();it++){
+    if(dynamic_cast< RPCChamber* >( *it ) != 0 ){
+      RPCChamber* ch = dynamic_cast< RPCChamber* >( *it );
+      std::vector< const RPCRoll*> roles = (ch->rolls());
+      RPCDetId rpcId = roles[0]->id();
+      if(rpcId.region()!=0){ //Only Endcap                                                                                                                    
+        disk_set.insert(rpcId.station());
+      }
+    }
+  }//end loop on geometry to get number of disks                                                                                                              
+  
+  numberOfDisks_ = disk_set.size();
+
 
   dbe_ = 0;
   dbe_ = edm::Service<DQMStore>().operator->();

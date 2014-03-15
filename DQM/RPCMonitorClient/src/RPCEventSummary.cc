@@ -10,7 +10,11 @@
 #include "FWCore/Framework/interface/LuminosityBlock.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EventSetup.h"
-//#include "FWCore/ParameterSet/interface/ParameterSet.h"
+///Geometry                                                                                                                                                  
+#include "Geometry/Records/interface/MuonGeometryRecord.h"
+#include "Geometry/CommonDetUnit/interface/GeomDet.h"
+#include "Geometry/RPCGeometry/interface/RPCGeomServ.h"
+#include "Geometry/RPCGeometry/interface/RPCGeometry.h"
 
 
 RPCEventSummary::RPCEventSummary(const edm::ParameterSet& ps ){
@@ -29,7 +33,7 @@ RPCEventSummary::RPCEventSummary(const edm::ParameterSet& ps ){
   prefixFolder_  =  subsystemFolder +"/"+  recHitTypeFolder ;
 
   minimumEvents_= ps.getUntrackedParameter<int>("MinimumRPCEvents", 10000);
-  numberDisk_ = ps.getUntrackedParameter<int>("NumberOfEndcapDisks", 4);
+  // numberDisk_ = ps.getUntrackedParameter<int>("NumberOfEndcapDisks", 4);
   doEndcapCertification_ = ps.getUntrackedParameter<bool>("EnableEndcapSummary", false);
 
   FEDRange_.first  = ps.getUntrackedParameter<unsigned int>("MinimumRPCFEDId", 790);
@@ -53,8 +57,26 @@ void RPCEventSummary::beginJob(){
 }
 
 void RPCEventSummary::beginRun(const edm::Run& r, const edm::EventSetup& setup){
- edm::LogVerbatim ("rpceventsummary") << "[RPCEventSummary]: Begin run";
+  edm::LogVerbatim ("rpceventsummary") << "[RPCEventSummary]: Begin run";
   
+  std::set<int> disk_set;
+  edm::ESHandle<RPCGeometry> rpcGeo;
+  setup.get<MuonGeometryRecord>().get(rpcGeo);
+
+  //loop on geometry to get number of disks  
+  for (TrackingGeometry::DetContainer::const_iterator it=rpcGeo->dets().begin();it<rpcGeo->dets().end();it++){
+    if(dynamic_cast< RPCChamber* >( *it ) != 0 ){
+      RPCChamber* ch = dynamic_cast< RPCChamber* >( *it );
+      std::vector< const RPCRoll*> roles = (ch->rolls());
+      RPCDetId rpcId = roles[0]->id();      
+      if(rpcId.region()!=0){ //Only Endcap
+	disk_set.insert(rpcId.station());
+      }
+    }
+  }//end loop on geometry to get number of disks
+
+  numberDisk_ = disk_set.size();
+
   init_ = false;  
   lumiCounter_ = prescaleFactor_ ;
 

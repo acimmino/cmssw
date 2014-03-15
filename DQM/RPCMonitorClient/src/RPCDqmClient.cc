@@ -14,6 +14,7 @@
 #include "Geometry/RPCGeometry/interface/RPCGeometry.h"
 #include "Geometry/RPCGeometry/interface/RPCGeomServ.h"
 #include "Geometry/Records/interface/MuonGeometryRecord.h"
+#include "Geometry/CommonDetUnit/interface/GeomDet.h"
 //Framework
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
@@ -73,14 +74,35 @@ void RPCDqmClient::beginJob(){
 
 void  RPCDqmClient::beginRun(const edm::Run& r, const edm::EventSetup& c){
 
-  if (!enableDQMClients_) return;
+  if (!enableDQMClients_) {return;}
 
-  
+
+  std::set<int> disk_set, ring_set;
+  edm::ESHandle<RPCGeometry> rpcGeo;
+  c.get<MuonGeometryRecord>().get(rpcGeo);
+
+  for (TrackingGeometry::DetContainer::const_iterator it=rpcGeo->dets().begin();it<rpcGeo->dets().end();it++){
+    if(dynamic_cast< RPCChamber* >( *it ) != 0 ){
+      RPCChamber* ch = dynamic_cast< RPCChamber* >( *it );
+      std::vector< const RPCRoll*> roles = (ch->rolls());
+      RPCDetId rpcId = roles[0]->id();
+      if(rpcId.region()!=0){ //Only Endcap                                                                                                                   
+        disk_set.insert(rpcId.station());
+	ring_set.insert(rpcId.ring());
+      }
+    }
+  }//end loop on geometry to get number of disks                                                                                                              
+
+  numberDisk_ = disk_set.size();
+  numberOfInnerRings_ = (*ring_set.begin());
+
+
+
   for ( std::vector<RPCClient*>::iterator it = clientModules_.begin(); it!=clientModules_.end(); it++ ){
-    (*it)->beginRun(r,c);
+    (*it)->beginRun(r,c, numberDisk_ ,  numberOfInnerRings_ );
   }
 
-  if(!offlineDQM_) this->getMonitorElements(r, c);
+  if(!offlineDQM_){ this->getMonitorElements(r, c);}
   
   lumiCounter_ = prescaleGlobalFactor_;
   init_ = false;
@@ -91,14 +113,14 @@ void  RPCDqmClient::beginRun(const edm::Run& r, const edm::EventSetup& c){
 void  RPCDqmClient::endRun(const edm::Run& r, const edm::EventSetup& c){
   edm::LogVerbatim ("rpcdqmclient") << "[RPCDqmClient]: End Run";
 
-  if (!enableDQMClients_) return;
+  if (!enableDQMClients_) {return;}
 
-  if(offlineDQM_) this->getMonitorElements(r, c);
+  if(offlineDQM_) {this->getMonitorElements(r, c);}
 
   float   rpcevents = minimumEvents_;
   if(RPCEvents_) rpcevents = RPCEvents_ ->getBinContent(1);
   
-  if(rpcevents < minimumEvents_) return;
+  if(rpcevents < minimumEvents_) {return;}
   
   for (std::vector<RPCClient*>::iterator it = clientModules_.begin(); it!=clientModules_.end(); it++ ){
     (*it)->clientOperation(c);
@@ -197,8 +219,9 @@ void RPCDqmClient::endLuminosityBlock(edm::LuminosityBlock const& lumiSeg, edm::
 
   edm::LogVerbatim ("rpcdqmclient") <<"[RPCDqmClient]: End of LS ";
 
-  for (std::vector<RPCClient*>::iterator it = clientModules_.begin(); it!=clientModules_.end(); it++ )
+  for (std::vector<RPCClient*>::iterator it = clientModules_.begin(); it!=clientModules_.end(); it++ ){
     (*it)->endLuminosityBlock( lumiSeg, c);
+  }
   
   float   rpcevents = minimumEvents_;
   if(RPCEvents_) rpcevents = RPCEvents_ ->getBinContent(1);

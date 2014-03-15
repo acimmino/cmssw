@@ -12,8 +12,6 @@ RPCClusterSizeTest::RPCClusterSizeTest(const edm::ParameterSet& ps ){
   
   prescaleFactor_ =  ps.getUntrackedParameter<int>("DiagnosticPrescale", 1);
   
-  numberOfDisks_ = ps.getUntrackedParameter<int>("NumberOfEndcapDisks", 4);
-  numberOfRings_ = ps.getUntrackedParameter<int>("NumberOfEndcapRings", 2);
   testMode_ = ps.getUntrackedParameter<bool>("testMode", false);
   useRollInfo_ = ps.getUntrackedParameter<bool>("useRollInfo", false);
 
@@ -172,7 +170,10 @@ void RPCClusterSizeTest::resetMEArrays(void) {
 }
 
 
-void  RPCClusterSizeTest::beginRun(const edm::Run& r, const edm::EventSetup& c) {
+void  RPCClusterSizeTest::beginRun(const edm::Run& r, const edm::EventSetup& c, int di, int ri) {
+
+  numberOfDisks_ = di;
+  numberOfRings_ = ri;
 
   resetMEArrays();
   

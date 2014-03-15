@@ -1,5 +1,4 @@
-//
-// Original Author:  Cesare Calabria,161 R-006,
+//Original Author:  Cesare Calabria,161 R-006,
 //         Created:  Fri May 13 12:58:43 CEST 2011
 
 
@@ -9,15 +8,18 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
+///Geometry                                                                                                                                                  
+#include "Geometry/Records/interface/MuonGeometryRecord.h"
+#include "Geometry/CommonDetUnit/interface/GeomDet.h"
+#include "Geometry/RPCGeometry/interface/RPCGeomServ.h"
+#include "Geometry/RPCGeometry/interface/RPCGeometry.h"
+
 
 RPCEfficiencyPerRingLayer::RPCEfficiencyPerRingLayer(const edm::ParameterSet& ps) {
 
   globalFolder_ = ps.getUntrackedParameter<std::string>("GlobalFolder", "RPC/RPCEfficiency/");
   SaveFile  = ps.getUntrackedParameter<bool>("SaveFile", false);
   NameFile  = ps.getUntrackedParameter<std::string>("NameFile","RPCEfficiency.root");
-
-  numberOfDisks_ = ps.getUntrackedParameter<int>("NumberOfEndcapDisks", 4);
-  innermostRings_ = ps.getUntrackedParameter<int>("NumberOfInnermostEndcapRings", 2);
 
 }
 
@@ -34,6 +36,28 @@ void RPCEfficiencyPerRingLayer::beginJob(){
 void RPCEfficiencyPerRingLayer::beginRun(const edm::Run& r, const edm::EventSetup& c){
 
   if(dbe_ == 0) return;
+
+
+  std::set<int> disk_set, ring_set;
+  edm::ESHandle<RPCGeometry> rpcGeo;
+  c.get<MuonGeometryRecord>().get(rpcGeo);
+
+  //loop on geometry to get number of disks                                                                                                                   
+  for (TrackingGeometry::DetContainer::const_iterator it=rpcGeo->dets().begin();it<rpcGeo->dets().end();it++){
+    if(dynamic_cast< RPCChamber* >( *it ) != 0 ){
+      RPCChamber* ch = dynamic_cast< RPCChamber* >( *it );
+      std::vector< const RPCRoll*> roles = (ch->rolls());
+      RPCDetId rpcId = roles[0]->id();
+      if(rpcId.region()!=0){ //Only Endcap
+	ring_set.insert(rpcId.ring());
+        disk_set.insert(rpcId.station());
+      }
+    }
+  }//end loop on geometry to get number of disks                                                                                                              
+  innermostRings_ = (*ring_set.begin());
+  numberOfDisks_ = disk_set.size();
+
+
 
   dbe_->setCurrentFolder(globalFolder_);
   EfficiencyPerRing = dbe_->book1D("EfficiencyPerRing","Efficiency per Ring",12,0.5,12.5);

@@ -47,6 +47,9 @@ public:
   void getMonitorElements(const edm::Run&, const edm::EventSetup& );
  private:
 
+  int   numberDisk_;
+  int  numberOfInnerRings_ ;
+
     bool offlineDQM_;
   int prescaleGlobalFactor_, minimumEvents_, numLumBlock_;
  

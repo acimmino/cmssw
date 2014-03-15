@@ -19,7 +19,12 @@
 
 const std::string RPCMonitorDigi::regionNames_[3] =  {"Endcap-", "Barrel", "Endcap+"};
 
-RPCMonitorDigi::RPCMonitorDigi( const edm::ParameterSet& pset ):counter(0){
+RPCMonitorDigi::RPCMonitorDigi( const edm::ParameterSet& pset )
+ : counter(0),
+   dcs_(false),
+   numberOfDisks_(0),
+   numberOfInnerRings_(0){
+
 
   saveRootFile  = pset.getUntrackedParameter<bool>("SaveRootFile", false); 
   RootFileName  = pset.getUntrackedParameter<std::string>("RootFileName", "RPCMonitorDigiDQM.root"); 
@@ -35,8 +40,8 @@ RPCMonitorDigi::RPCMonitorDigi( const edm::ParameterSet& pset ):counter(0){
 
   rpcRecHitLabel_ = pset.getParameter<edm::InputTag>("RecHitLabel");
 
-  numberOfDisks_ = pset.getUntrackedParameter<int>("NumberOfEndcapDisks", 4);
-  numberOfInnerRings_ = pset.getUntrackedParameter<int>("NumberOfInnermostEndcapRings", 2);
+  //  numberOfDisks_ = pset.getUntrackedParameter<int>("NumberOfEndcapDisks", 4);
+  // numberOfInnerRings_ = pset.getUntrackedParameter<int>("NumberOfInnermostEndcapRings", 2);
 
   noiseFolder_ = pset.getUntrackedParameter<std::string>("NoiseFolder", "AllHits");
   muonFolder_ = pset.getUntrackedParameter<std::string>("MuonFolder", "Muon");
@@ -53,12 +58,53 @@ void RPCMonitorDigi::beginRun(const edm::Run& r, const edm::EventSetup& iSetup){
   /// get hold of back-end interface
   dbe = edm::Service<DQMStore>().operator->();
 
+  std::set<int> disk_set, ring_set;
+  edm::ESHandle<RPCGeometry> rpcGeo;
+  iSetup.get<MuonGeometryRecord>().get(rpcGeo);
+  //loop on geometry to book all MEs
+  edm::LogInfo ("rpcmonitordigi") <<"[RPCMonitorDigi]: Booking histograms per roll. " ;
+  for (TrackingGeometry::DetContainer::const_iterator it=rpcGeo->dets().begin();it<rpcGeo->dets().end();it++){
+    if(dynamic_cast< RPCChamber* >( *it ) != 0 ){
+      RPCChamber* ch = dynamic_cast< RPCChamber* >( *it ); 
+      std::vector< const RPCRoll*> roles = (ch->rolls());
+      if(useRollInfo_){
+	for(std::vector<const RPCRoll*>::const_iterator r = roles.begin();r != roles.end(); ++r){
+	  RPCDetId rpcId = (*r)->id();
+
+	  //get station and inner ring
+	  if(rpcId.region()!=0){
+	    disk_set.insert(rpcId.station());
+	    ring_set.insert(rpcId.ring());
+	  }
+
+	  //booking all histograms
+	  RPCGeomServ rpcsrv(rpcId);
+	  std::string nameID = rpcsrv.name();
+	  if(useMuonDigis_) {bookRollME(rpcId ,iSetup, muonFolder_, meMuonCollection[nameID]);}
+	  bookRollME(rpcId, iSetup, noiseFolder_, meNoiseCollection[nameID]);
+	}
+      }else{
+	RPCDetId rpcId = roles[0]->id(); //any roll would do - here I just take the first one
+	RPCGeomServ rpcsrv(rpcId);
+	std::string nameID = rpcsrv.chambername();
+	if(useMuonDigis_) {bookRollME(rpcId,iSetup, muonFolder_, meMuonCollection[nameID]);}
+	bookRollME(rpcId, iSetup, noiseFolder_, meNoiseCollection[nameID]);
+	if(rpcId.region()!=0){
+	  disk_set.insert(rpcId.station());
+	  ring_set.insert(rpcId.ring());
+	}
+      }
+    }
+  }//end loop on geometry to book all MEs
+
+  numberOfDisks_ = disk_set.size();
+  numberOfInnerRings_ = (*ring_set.begin());
+
+  
   //Book 
   this->bookRegionME(noiseFolder_, regionNoiseCollection);
   this->bookSectorRingME(noiseFolder_, sectorRingNoiseCollection);
   this->bookWheelDiskME(noiseFolder_, wheelDiskNoiseCollection);
-
-
 
   std::string currentFolder = subsystemFolder_ +"/"+noiseFolder_;
   dbe->setCurrentFolder(currentFolder);
@@ -91,33 +137,6 @@ void RPCMonitorDigi::beginRun(const edm::Run& r, const edm::EventSetup& iSetup){
   }
    
 
-  edm::ESHandle<RPCGeometry> rpcGeo;
-  iSetup.get<MuonGeometryRecord>().get(rpcGeo);
-  //loop on geometry to book all MEs
-  edm::LogInfo ("rpcmonitordigi") <<"[RPCMonitorDigi]: Booking histograms per roll. " ;
-  for (TrackingGeometry::DetContainer::const_iterator it=rpcGeo->dets().begin();it<rpcGeo->dets().end();it++){
-    if(dynamic_cast< RPCChamber* >( *it ) != 0 ){
-      RPCChamber* ch = dynamic_cast< RPCChamber* >( *it ); 
-      std::vector< const RPCRoll*> roles = (ch->rolls());
-      if(useRollInfo_){
-	for(std::vector<const RPCRoll*>::const_iterator r = roles.begin();r != roles.end(); ++r){
-	  RPCDetId rpcId = (*r)->id();
-	  //booking all histograms
-	  RPCGeomServ rpcsrv(rpcId);
-	  std::string nameID = rpcsrv.name();
-	  if(useMuonDigis_) bookRollME(rpcId ,iSetup, muonFolder_, meMuonCollection[nameID]);
-	  bookRollME(rpcId, iSetup, noiseFolder_, meNoiseCollection[nameID]);
-	}
-      }else{
-	RPCDetId rpcId = roles[0]->id(); //any roll would do - here I just take the first one
-	RPCGeomServ rpcsrv(rpcId);
-	std::string nameID = rpcsrv.chambername();
-	if(useMuonDigis_) bookRollME(rpcId,iSetup, muonFolder_, meMuonCollection[nameID]);
-	bookRollME(rpcId, iSetup, noiseFolder_, meNoiseCollection[nameID]);
-	
-      }
-    }
-  }//end loop on geometry to book all MEs
 
 
   //Clear flags;

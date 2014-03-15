@@ -20,6 +20,11 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 //DQM Services
 #include "DQMServices/Core/interface/DQMStore.h"
+///Geometry                                                                                                                                                  
+#include "Geometry/Records/interface/MuonGeometryRecord.h"
+#include "Geometry/CommonDetUnit/interface/GeomDet.h"
+#include "Geometry/RPCGeometry/interface/RPCGeomServ.h"
+#include "Geometry/RPCGeometry/interface/RPCGeometry.h"
 
 RPCEfficiencyShiftHisto::RPCEfficiencyShiftHisto(const edm::ParameterSet& ps) {
 
@@ -27,7 +32,6 @@ RPCEfficiencyShiftHisto::RPCEfficiencyShiftHisto(const edm::ParameterSet& ps) {
   effCut_= ps.getUntrackedParameter<int>("EffCut", 90);
   SaveFile  = ps.getUntrackedParameter<bool>("SaveFile", false);
   NameFile  = ps.getUntrackedParameter<std::string>("NameFile","RPCEfficiency.root");
-  numberOfDisks_ = ps.getUntrackedParameter<int>("NumberOfEndcapDisks", 4);
 }
 
 
@@ -43,6 +47,26 @@ void RPCEfficiencyShiftHisto::beginJob(){
 void RPCEfficiencyShiftHisto::beginRun(const edm::Run& r, const edm::EventSetup& c){
 
   if(dbe_ == 0) return;
+
+  std::set<int> disk_set;
+  edm::ESHandle<RPCGeometry> rpcGeo;
+  c.get<MuonGeometryRecord>().get(rpcGeo);
+
+  //loop on geometry to get number of disks                                                                                                                   
+  for (TrackingGeometry::DetContainer::const_iterator it=rpcGeo->dets().begin();it<rpcGeo->dets().end();it++){
+    if(dynamic_cast< RPCChamber* >( *it ) != 0 ){
+      RPCChamber* ch = dynamic_cast< RPCChamber* >( *it );
+      std::vector< const RPCRoll*> roles = (ch->rolls());
+      RPCDetId rpcId = roles[0]->id();
+      if(rpcId.region()!=0){ //Only Endcap                                                                                                                    
+        disk_set.insert(rpcId.station());
+      }
+    }
+  }//end loop on geometry to get number of disks                                                                                                              
+
+  numberOfDisks_ = disk_set.size();
+
+
 
   dbe_->setCurrentFolder(globalFolder_);
   EffBarrelRoll = dbe_->book1D("EffBarrelRoll", "Barrel Efficiency",101,-0.5, 100.5);

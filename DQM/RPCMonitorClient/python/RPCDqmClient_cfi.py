@@ -7,9 +7,7 @@ rpcdqmclient = cms.EDAnalyzer("RPCDqmClient",
                               RecHitTypeFolder = cms.untracked.string("AllHits"),
                               OfflineDQM = cms.untracked.bool(True),
                               UseRollInfo = cms.untracked.bool(False),
-                              EnableRPCDqmClient  = cms.untracked.bool(True),
-                              NumberOfEndcapDisks  = cms.untracked.int32(4),
-                              NumberOfEndcapRings  = cms.untracked.int32(2)
+                              EnableRPCDqmClient  = cms.untracked.bool(True)
                               )
 
 
@@ -21,6 +19,4 @@ rpcdqmMuonclient = cms.EDAnalyzer("RPCDqmClient",
                                   OfflineDQM = cms.untracked.bool(True),
                                   UseRollInfo = cms.untracked.bool(False),
                                   EnableRPCDqmClient  = cms.untracked.bool(True),
-                                  NumberOfEndcapDisks  = cms.untracked.int32(4),
-                                  NumberOfEndcapRings  = cms.untracked.int32(2)
                               )

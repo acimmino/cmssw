@@ -22,8 +22,6 @@ RPCBxTest::RPCBxTest(const edm::ParameterSet& ps ){
   rmsCut_ = ps.getUntrackedParameter<double>("RMSCut");
   distanceMean_ = ps.getUntrackedParameter<double>("DistanceFromZeroBx");
 
-  numberOfDisks_ = ps.getUntrackedParameter<int>("NumberOfEndcapDisks", 4);
-  numberOfRings_ = ps.getUntrackedParameter<int>("NumberOfEndcapRings", 2);
 }
 
 RPCBxTest::~RPCBxTest(){ dbe_=0;}
@@ -34,9 +32,14 @@ void RPCBxTest::beginJob(DQMStore *  dbe){
 }
 
 //Qui puoi definitre gli istogrammi nuovi che vuoi riempire
-void RPCBxTest::beginRun(const edm::Run& r, const edm::EventSetup& c){
+void RPCBxTest::beginRun(const edm::Run& r, const edm::EventSetup& c, int di, int ri){
   edm::LogVerbatim ("rpcbxtest") << "[RPCBxTest]: Begin run";
   
+
+  numberOfDisks_ = di;
+  numberOfRings_ = ri;
+
+
   MonitorElement* me;
   dbe_->setCurrentFolder(globalFolder_);
 

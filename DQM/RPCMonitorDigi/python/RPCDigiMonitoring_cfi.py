@@ -11,8 +11,7 @@ rpcdigidqm = cms.EDAnalyzer("RPCMonitorDigi",
                             ScalersRawToDigiLabel = cms.InputTag('scalersRawToDigi'),
                             RPCFolder = cms.untracked.string('RPC'),
                             GlobalFolder = cms.untracked.string('SummaryHistograms'),
-                            RecHitLabel = cms.InputTag("rpcRecHits"),
-                         
+                            RecHitLabel = cms.InputTag("rpcRecHits"),                         
                             NoiseFolder  = cms.untracked.string("AllHits"),
                             MuonFolder = cms.untracked.string("Muon")
                             )
