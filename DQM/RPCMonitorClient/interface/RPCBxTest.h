@@ -23,7 +23,7 @@ public:
   void beginJob(DQMStore *);
 
   //Begin Run
-   void beginRun(const edm::Run& r, const edm::EventSetup& c);
+  void beginRun(const edm::Run& r, const edm::EventSetup& c, int ,int);
   
   void getMonitorElements(std::vector<MonitorElement *> & , std::vector<RPCDetId>& );
   

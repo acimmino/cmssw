@@ -23,7 +23,7 @@ public:
   void beginLuminosityBlock(edm::LuminosityBlock const& lumiSeg, edm::EventSetup const& context) ;
   void analyze(const edm::Event& iEvent, const edm::EventSetup& c);
   void endLuminosityBlock(edm::LuminosityBlock const& lumiSeg, edm::EventSetup const& c);
-  void beginRun(const edm::Run& , const edm::EventSetup& ); 		
+  void beginRun(const edm::Run& , const edm::EventSetup& , int, int); 		
   void endJob();
   void clientOperation(edm::EventSetup const& c);
   void getMonitorElements(std::vector<MonitorElement *> & , std::vector<RPCDetId>& );

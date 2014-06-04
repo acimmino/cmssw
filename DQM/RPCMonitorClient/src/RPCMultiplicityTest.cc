@@ -17,8 +17,6 @@ RPCMultiplicityTest::RPCMultiplicityTest(const edm::ParameterSet& ps ){
   edm::LogVerbatim ("multiplicity") << "[RPCMultiplicityTest]: Constructor";
   useRollInfo_ = ps.getUntrackedParameter<bool>("UseRollInfo", false);
   prescaleFactor_ = ps.getUntrackedParameter<int>("DiagnosticPrescale", 1);
-  numberOfDisks_ = ps.getUntrackedParameter<int>("NumberOfEndcapDisks", 4);
-  numberOfRings_ = ps.getUntrackedParameter<int>("NumberOfEndcapRings", 2);
   testMode_ = ps.getUntrackedParameter<bool>("testMode", false);
 }
 
@@ -83,7 +81,11 @@ void RPCMultiplicityTest::clientOperation(edm::EventSetup const& iSetup) {
   }//End loop on MEs
 }
  
-void RPCMultiplicityTest::beginRun(const edm::Run& r, const edm::EventSetup& c){
+void RPCMultiplicityTest::beginRun(const edm::Run& r, const edm::EventSetup& c, int di, int ri){
+
+  numberOfDisks_ = di;
+  numberOfRings_ = ri;
+
 
   MonitorElement* me=NULL;
   dbe_->setCurrentFolder(globalFolder_);

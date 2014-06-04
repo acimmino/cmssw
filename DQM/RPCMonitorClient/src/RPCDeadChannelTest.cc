@@ -20,8 +20,7 @@ RPCDeadChannelTest::RPCDeadChannelTest(const edm::ParameterSet& ps ){
   useRollInfo_ = ps.getUntrackedParameter<bool>("UseRollInfo", false);
 
   prescaleFactor_ = ps.getUntrackedParameter<int>("DiagnosticPrescale", 1);
-  numberOfDisks_ = ps.getUntrackedParameter<int>("NumberOfEndcapDisks", 4);
-  numberOfRings_ = ps.getUntrackedParameter<int>("NumberOfEndcapRings", 2);
+
 }
 
 RPCDeadChannelTest::~RPCDeadChannelTest(){dbe_ = 0;}
@@ -136,7 +135,12 @@ void RPCDeadChannelTest::clientOperation( edm::EventSetup const& iSetup){
 
 }
  
-void RPCDeadChannelTest::beginRun(const edm::Run& r, const edm::EventSetup& c){
+void RPCDeadChannelTest::beginRun(const edm::Run& r, const edm::EventSetup& c, int di, int ri){
+
+
+  numberOfDisks_ = di;
+  numberOfRings_ = ri;
+
 
   MonitorElement* me;
   dbe_->setCurrentFolder( globalFolder_);

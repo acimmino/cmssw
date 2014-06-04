@@ -30,6 +30,7 @@ public:
 
 private:
   virtual void beginJob() ;
+  void beginRun(const edm::Run& , const edm::EventSetup&);
   virtual void beginLuminosityBlock(const edm::LuminosityBlock& , const  edm::EventSetup&);
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
   virtual void endLuminosityBlock(const edm::LuminosityBlock& , const  edm::EventSetup&);

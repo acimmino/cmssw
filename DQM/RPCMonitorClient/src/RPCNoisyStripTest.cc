@@ -16,8 +16,6 @@ RPCNoisyStripTest::RPCNoisyStripTest(const edm::ParameterSet& ps ){
   edm::LogVerbatim ("rpcnoisetest") << "[RPCNoisyStripTest]: Constructor";
  
   prescaleFactor_ = ps.getUntrackedParameter<int>("DiagnosticPrescale", 1);
-  numberOfDisks_ = ps.getUntrackedParameter<int>("NumberOfEndcapDisks", 4);
-  numberOfRings_ = ps.getUntrackedParameter<int>("NumberOfEndcapRings", 2);
   useRollInfo_ = ps.getUntrackedParameter<bool>("UseRollInfo", false);
   testMode_ = ps.getUntrackedParameter<bool>("testMode", false);
 
@@ -54,7 +52,10 @@ void RPCNoisyStripTest::clientOperation(edm::EventSetup const& iSetup) {
 
 }
  
-void  RPCNoisyStripTest::beginRun(const edm::Run& r, const edm::EventSetup& c){
+void  RPCNoisyStripTest::beginRun(const edm::Run& r, const edm::EventSetup& c, int di, int ri){
+
+  numberOfDisks_ = di;
+  numberOfRings_ = ri;
 
 
  MonitorElement* me;

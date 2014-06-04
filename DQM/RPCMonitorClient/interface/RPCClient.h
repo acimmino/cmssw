@@ -47,7 +47,7 @@ class RPCClient {
   
   virtual void endJob(void)       = 0;
   
-  virtual void beginRun(const edm::Run& , const edm::EventSetup& )     = 0;
+  virtual void beginRun(const edm::Run& , const edm::EventSetup& , int, int)     = 0;
   
   virtual void endRun(const edm::Run& , const edm::EventSetup& )       = 0;  
 
