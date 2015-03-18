@@ -61,27 +61,28 @@ void RPCEventSummary::dqmEndLuminosityBlock(DQMStore::IBooker & ibooker, DQMStor
     
     edm::eventsetup::EventSetupRecordKey recordKey(edm::eventsetup::EventSetupRecordKey::TypeTag::findType("RunInfoRcd"));
     
+    //Set default for flags
     int defaultValue = 1;
+    isIn_=true;
     
     if(0 != setup.find( recordKey ) ) {
       defaultValue = -1;
+      isIn_ = false;
       //get fed summary information
       edm::ESHandle<RunInfo> sumFED;
       setup.get<RunInfoRcd>().get(sumFED);    
       std::vector<int> FedsInIds= sumFED->m_fed_in;   
       unsigned int f = 0;
-      bool flag = false;
-      while(!flag && f < FedsInIds.size()) {
+      while(!isIn_ && f < FedsInIds.size()) {
 	int fedID=FedsInIds[f];
 	//make sure fed id is in allowed range  
 	if(fedID>=FEDRange_.first && fedID<=FEDRange_.second) {
 	  defaultValue = 1;
-	  flag = true;
+	  isIn_ = true;
 	} 
       f++;
       }   
     }   
-    
     
     MonitorElement* me;
     ibooker.setCurrentFolder(eventInfoPath_);
@@ -182,6 +183,9 @@ void RPCEventSummary::dqmEndJob(DQMStore::IBooker & ibooker, DQMStore::IGetter &
 }
 
 void RPCEventSummary::clientOperation( DQMStore::IGetter & igetter){
+  
+  // if we are out no need to do anything
+  if (!isIn_) {return;} 
 
   float  rpcevents = minimumEvents_;
   MonitorElement *  RPCEvents ;
@@ -191,7 +195,6 @@ void RPCEventSummary::clientOperation( DQMStore::IGetter & igetter){
     rpcevents = RPCEvents ->getBinContent(1);
   }
   
-
   if(rpcevents < minimumEvents_) return;
   std::stringstream meName;
   MonitorElement * myMe;
