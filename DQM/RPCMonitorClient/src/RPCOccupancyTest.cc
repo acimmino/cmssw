@@ -15,7 +15,7 @@ RPCOccupancyTest::RPCOccupancyTest(const edm::ParameterSet& ps ){
   prescaleFactor_ = ps.getUntrackedParameter<int>("DiagnosticPrescale", 1);
   numberOfDisks_ = ps.getUntrackedParameter<int>("NumberOfEndcapDisks", 4);
   numberOfRings_ = ps.getUntrackedParameter<int>("NumberOfEndcapRings", 2);
-  testMode_ = ps.getUntrackedParameter<bool>("testMode", true);
+  fractionalMode_ = ps.getUntrackedParameter<bool>("fractionalMode", true);
   useRollInfo_ = ps.getUntrackedParameter<bool>("useRollInfo_", false);
 
   std::string subsystemFolder = ps.getUntrackedParameter<std::string>("RPCFolder", "RPC");
@@ -93,7 +93,7 @@ void RPCOccupancyTest::myBooker(DQMStore::IBooker & ibooker){
     rpcUtils.labelYAxisRoll(AsyMeWheel[w+2], 0, w,  useRollInfo_);
   
     
-    if(testMode_){
+    if(fractionalMode_){
   
       histoName.str("");
       histoName<<"OccupancyNormByEvents_Wheel"<<w;
@@ -130,7 +130,7 @@ void RPCOccupancyTest::myBooker(DQMStore::IBooker & ibooker){
     
    
     
-    if(testMode_){
+    if(fractionalMode_){
    
       histoName.str("");
       histoName<<"OccupancyNormByEvents_Disk"<<d;
@@ -163,7 +163,7 @@ if (!myMe) return;
        
     if(detId.region() ==0){
       AsyMe= AsyMeWheel[detId.ring()+2];
-      if(testMode_){
+      if(fractionalMode_){
 	NormOccup=NormOccupWheel[detId.ring()+2];
 	AsyMeD= AsyMeDWheel[detId.ring()+2];
 	NormOccupD=NormOccupDWheel[detId.ring()+2];
@@ -175,14 +175,14 @@ if (!myMe) return;
 	
 	if(detId.region()<0){
 	  AsyMe= AsyMeDisk[-detId.station()  + numberOfDisks_];
-	  if(testMode_){
+	  if(fractionalMode_){
 	    NormOccup=NormOccupDisk[-detId.station() + numberOfDisks_];
 	    AsyMeD= AsyMeDDisk[-detId.station() + numberOfDisks_];	  
 	    NormOccupD=NormOccupDDisk[-detId.station() + numberOfDisks_];
 	  }
 	}else{
 	  AsyMe= AsyMeDisk[detId.station() + numberOfDisks_-1];
-	  if(testMode_){
+	  if(fractionalMode_){
 	    NormOccup=NormOccupDisk[detId.station() + numberOfDisks_-1];
 	    AsyMeD= AsyMeDDisk[detId.station() + numberOfDisks_-1];
 	    NormOccupD=NormOccupDDisk[detId.station() + numberOfDisks_-1];
@@ -226,7 +226,7 @@ if (!myMe) return;
     float normoccup = 1;
     if(rpcevents_ != 0) normoccup = (totEnt/rpcevents_);
    
-    if(testMode_){
+    if(fractionalMode_){
       if(NormOccup)  NormOccup->setBinContent(xBin,yBin, normoccup);
       if(AsyMeD) AsyMeD->Fill(asym);
       if(NormOccupD) NormOccupD->Fill(normoccup);

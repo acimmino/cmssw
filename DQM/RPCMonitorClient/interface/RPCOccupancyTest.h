@@ -31,7 +31,7 @@ public:
 private:
   
   std::string globalFolder_, prefixDir_;
-  bool testMode_;
+  bool fractionalMode_;
   bool  useRollInfo_;
   std::vector<MonitorElement *>  myOccupancyMe_;
   std::vector<RPCDetId>   myDetIds_;
