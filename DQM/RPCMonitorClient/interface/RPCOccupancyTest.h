@@ -44,13 +44,11 @@ private:
   MonitorElement * AsyMeWheel[5];      //Left Right Asymetry 
   MonitorElement * NormOccupWheel[5];
  
-  MonitorElement * AsyMeDWheel[5];      //Left Right Asymetry 
   MonitorElement * NormOccupDWheel[5];
 
   MonitorElement * AsyMeDisk[10];      //Left Right Asymetry 
   MonitorElement * NormOccupDisk[10];
  
-  MonitorElement * AsyMeDDisk[10];      //Left Right Asymetry 
   MonitorElement * NormOccupDDisk[10];
   MonitorElement * Barrel_OccBySt;
   MonitorElement * EndCap_OccByRng;

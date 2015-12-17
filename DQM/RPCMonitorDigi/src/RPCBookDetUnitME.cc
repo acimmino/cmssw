@@ -47,6 +47,11 @@ void RPCMonitorDigi::bookRollME(DQMStore::IBooker & ibooker, RPCDetId & detId, c
   meMap[os.str()] = ibooker.book1D(os.str(), os.str(), 7, -3.5, 3.5);
   ibooker.tag( meMap[os.str()],  rpcdqm::BX);
 
+  os.str("");
+  os<<"BXWithData_"<<nameRoll;
+  meMap[os.str()] = ibooker.book1D(os.str(), os.str(), 8, -0.5, 7.5);
+  ibooker.tag( meMap[os.str()],  rpcdqm::BX);
+
   if(detId.region() == 0){
     os.str("");
     os<<"ClusterSize_"<<nameRoll;

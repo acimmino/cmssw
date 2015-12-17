@@ -15,7 +15,7 @@ RPCOccupancyTest::RPCOccupancyTest(const edm::ParameterSet& ps ){
   prescaleFactor_ = ps.getUntrackedParameter<int>("DiagnosticPrescale", 1);
   numberOfDisks_ = ps.getUntrackedParameter<int>("NumberOfEndcapDisks", 4);
   numberOfRings_ = ps.getUntrackedParameter<int>("NumberOfEndcapRings", 2);
-  testMode_ = ps.getUntrackedParameter<bool>("testMode", false);
+  testMode_ = ps.getUntrackedParameter<bool>("testMode", true);
   useRollInfo_ = ps.getUntrackedParameter<bool>("useRollInfo_", false);
 
   std::string subsystemFolder = ps.getUntrackedParameter<std::string>("RPCFolder", "RPC");
@@ -104,12 +104,7 @@ void RPCOccupancyTest::myBooker(DQMStore::IBooker & ibooker){
       
       
       histoName.str("");
-      histoName<<"AsymmetryLeftRight_Distribution_Wheel"<<w;  
-      AsyMeDWheel[w+2] = ibooker.book1D(histoName.str().c_str(), histoName.str().c_str(),  20, -0.1, 1.1);
-      
-      histoName.str("");
-      histoName<<"OccupancyNormByEvents_Distribution_Wheel"<<w;   
-    
+      histoName<<"OccupancyNormByEvents_Distribution_Wheel"<<w;       
       NormOccupDWheel[w+2] = ibooker.book1D(histoName.str().c_str(), histoName.str().c_str(),  100, 0.0, 0.205);
     }
   }//end Barrel
@@ -140,10 +135,6 @@ void RPCOccupancyTest::myBooker(DQMStore::IBooker & ibooker){
       rpcUtils.labelYAxisRing( NormOccupDisk[d+offset],numberOfRings_,  useRollInfo_);
       
       histoName.str("");
-      histoName<<"AsymmetryLeftRight_Distribution_Disk"<<d;      
-      AsyMeDDisk[d+offset] = ibooker.book1D(histoName.str().c_str(), histoName.str().c_str(),  20, -0.1, 1.1);
-      
-      histoName.str("");
       histoName<<"OccupancyNormByEvents_Distribution_Disk"<<d;  
       NormOccupDDisk[d+offset] = ibooker.book1D(histoName.str().c_str(), histoName.str().c_str(),  100, 0.0, 0.205);
     }
@@ -157,7 +148,6 @@ void RPCOccupancyTest::fillGlobalME(RPCDetId & detId, MonitorElement * myMe){
 if (!myMe) return;
     
     MonitorElement * AsyMe=NULL;      //Left Right Asymetry 
-    MonitorElement * AsyMeD=NULL; 
     MonitorElement * NormOccup=NULL;
     MonitorElement * NormOccupD=NULL;
        
@@ -165,7 +155,6 @@ if (!myMe) return;
       AsyMe= AsyMeWheel[detId.ring()+2];
       if(testMode_){
 	NormOccup=NormOccupWheel[detId.ring()+2];
-	AsyMeD= AsyMeDWheel[detId.ring()+2];
 	NormOccupD=NormOccupDWheel[detId.ring()+2];
       }
 
@@ -177,14 +166,12 @@ if (!myMe) return;
 	  AsyMe= AsyMeDisk[-detId.station()  + numberOfDisks_];
 	  if(testMode_){
 	    NormOccup=NormOccupDisk[-detId.station() + numberOfDisks_];
-	    AsyMeD= AsyMeDDisk[-detId.station() + numberOfDisks_];	  
 	    NormOccupD=NormOccupDDisk[-detId.station() + numberOfDisks_];
 	  }
 	}else{
 	  AsyMe= AsyMeDisk[detId.station() + numberOfDisks_-1];
 	  if(testMode_){
 	    NormOccup=NormOccupDisk[detId.station() + numberOfDisks_-1];
-	    AsyMeD= AsyMeDDisk[detId.station() + numberOfDisks_-1];
 	    NormOccupD=NormOccupDDisk[detId.station() + numberOfDisks_-1];
 	  }
 	}
@@ -211,24 +198,23 @@ if (!myMe) return;
     
     float  totEnt =  myMe->getEntries();
     for(int strip = 1 ; strip<=stripInRoll; strip++){
-      if(strip<=stripInRoll/2) FOccupancy+=myMe->getBinContent(strip);
-      else  BOccupancy+=myMe->getBinContent(strip);
+      if(strip<=stripInRoll/2) {FOccupancy+=myMe->getBinContent(strip);}
+      else  {BOccupancy+=myMe->getBinContent(strip);}
     }
 	    
 
     float asym = 0;
-    if(totEnt != 0 ) asym =  fabs((FOccupancy - BOccupancy )/totEnt);
+    if(totEnt != 0 ){ asym =  fabs((FOccupancy - BOccupancy )/totEnt);}
     
-    if(AsyMe)  AsyMe->setBinContent(xBin,yBin,asym);
+    if(AsyMe) { AsyMe->setBinContent(xBin,yBin,asym);}
 
 
 	
     float normoccup = 1;
-    if(rpcevents_ != 0) normoccup = (totEnt/rpcevents_);
+    if(rpcevents_ != 0) {normoccup = (totEnt/rpcevents_);}
    
     if(testMode_){
       if(NormOccup)  NormOccup->setBinContent(xBin,yBin, normoccup);
-      if(AsyMeD) AsyMeD->Fill(asym);
       if(NormOccupD) NormOccupD->Fill(normoccup);
     }    
    

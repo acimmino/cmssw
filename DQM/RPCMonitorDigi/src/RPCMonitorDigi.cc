@@ -315,7 +315,7 @@ void RPCMonitorDigi::performSourceOperation(  std::map<RPCDetId , std::vector<RP
     }
 
     std::vector<RPCRecHit> recHits  = (*detIdIter).second;
-    int numberOfRecHits = recHits.size();
+    int numberOfRecHits = 0;
     totalNumberOfRecHits[region + 1 ] +=  numberOfRecHits;
 
     std::set<int> bxSet ;
@@ -328,6 +328,8 @@ void RPCMonitorDigi::performSourceOperation(  std::map<RPCDetId , std::vector<RP
       RPCRecHit recHit = (*recHitIter);
 
       int bx = recHit.BunchX();
+      if(bx > 4 || bx<-4) {continue;} //remove non-physical BX values
+      numberOfRecHits++;
       bxSet.insert(bx); 
       int clusterSize = (int)recHit.clusterSize();
       numDigi +=  clusterSize ;
@@ -349,12 +351,12 @@ void RPCMonitorDigi::performSourceOperation(  std::map<RPCDetId , std::vector<RP
       
       os.str("");
       os<<"BXDistribution_"<<nameRoll;
-      if(meMap[os.str()]) meMap[os.str()]->Fill(bx);
+      if(meMap[os.str()]){ meMap[os.str()]->Fill(bx);}
 
   
       os.str("");
       os<<"ClusterSize_"<<nameRoll;
-      if(meMap[os.str()]) meMap[os.str()]->Fill(clusterSize);
+      if(meMap[os.str()]) {meMap[os.str()]->Fill(clusterSize);}
  
 
 
