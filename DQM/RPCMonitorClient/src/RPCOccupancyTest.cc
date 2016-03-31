@@ -61,7 +61,7 @@ void RPCOccupancyTest::clientOperation() {
   //Fill Fraction ME
   if(Active_Fraction && totalStrips_!=0.){
     
-    Active_Fraction->Fill( totalActive_/totalStrips_);
+    Active_Fraction->Fill(1, totalActive_/totalStrips_);
   }
 
 }
