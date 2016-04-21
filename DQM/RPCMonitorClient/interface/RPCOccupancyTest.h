@@ -42,6 +42,7 @@ private:
   float rpcevents_;
 
   MonitorElement * Active_Fraction; // Fraction of channels with data
+  MonitorElement * Active_Dead;
 
   MonitorElement * AsyMeWheel[5];      //Left Right Asymetry 
   MonitorElement * NormOccupWheel[5];

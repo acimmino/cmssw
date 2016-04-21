@@ -62,6 +62,8 @@ void RPCOccupancyTest::clientOperation() {
   if(Active_Fraction && totalStrips_!=0.){
     
     Active_Fraction->Fill(1, totalActive_/totalStrips_);
+    Active_Dead->Fill( 1, totalActive_ );
+    Active_Dead->Fill( 2, totalStrips_ - totalActive_ );
   }
 
 }
@@ -78,6 +80,12 @@ void RPCOccupancyTest::myBooker(DQMStore::IBooker & ibooker){
   histoName<<"RPC_Active_Channel_Fractions";
   Active_Fraction = ibooker.book1D(histoName.str().c_str(), histoName.str().c_str(),  1, 0.5, 1.5);
   Active_Fraction -> setBinLabel(1, "Active Fraction", 1);
+
+  histoName.str("");
+  histoName<<"RPC_Active_Inactive_Strips";
+  Active_Dead = ibooker.book1D(histoName.str().c_str(), histoName.str().c_str(),  1, 0.5, 1.5);
+  Active_Dead -> setBinLabel(1, "Active Strips", 1);
+  Active_Dead -> setBinLabel(2, "Inactive Strips", 1);
 
   histoName.str("");
   histoName<<"Barrel_OccupancyByStations_Normalized";
