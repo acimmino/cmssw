@@ -219,9 +219,12 @@ void RPCMonitorDigi::analyze(const edm::Event& event,const edm::EventSetup& setu
 
 void RPCMonitorDigi::performSourceOperation(  std::map<RPCDetId , std::vector<RPCRecHit> > & recHitMap, std::string recHittype){
 
-  edm::LogInfo ("rpcmonitordigi") <<"[RPCMonitorDigi]: Performing DQM source operations for "; 
+  edm::LogInfo ("rpcmonitordigi") <<"[RPCMonitorDigi]: Performing DQM source operations for "<< counter; 
   
   if(recHitMap.size()==0) {return;} //if  
+
+  edm::LogInfo ("rpcmonitordigi") <<"[RPCMonitorDigi]: Found "<<recHitMap.size()<<" rolls fired"; 
+
 
   std::map<std::string, std::map<std::string, MonitorElement*> >  meRollCollection ;
   std::map<std::string, MonitorElement*>   meWheelDisk ;
